@@ -1,0 +1,1679 @@
+#! /home/minami/.local/Nuke/13.2v5/libnuke-13.2.5.so -nx
+#write_info Write1 file:"out.mp4" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 6" fps:"0" colorspace:"default (Gamma2.2)" datatype:"unknown" transfer:"unknown" views:"main" colorManagement:"Nuke"
+version 13.2 v5
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="0" y="1472" w="2560" h="1371" maximized="1" screen="0">
+        <splitter orientation="1">
+            <split size="40"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="1314" stretch="1"/>
+            <splitter orientation="2">
+                <split size="780"/>
+                <dock id="" activePageId="Viewer.3">
+                    <page id="Viewer.1"/>
+                    <page id="Viewer.3"/>
+                    <page id="Viewer.2"/>
+                </dock>
+                <split size="548"/>
+                <dock id="" activePageId="DAG.1" focus="true">
+                    <page id="DAG.1"/>
+                    <page id="Curve Editor.1"/>
+                    <page id="DopeSheet.1"/>
+                    <page id="DAG.2"/>
+                </dock>
+            </splitter>
+            <split size="1198"/>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"/>
+                <page id="uk.co.thefoundry.backgroundrenderview.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /home/minami/Desktop/chop-research/light-frickering/comp.nk
+ project_directory "\[python \{nuke.script_directory()\}]"
+ last_frame 6
+ lock_range true
+ format "1920 1080 0 0 1920 1080 1 HD_1080"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ colorManagement Nuke
+ OCIO_config aces_1.2
+ workingSpaceLUT linear
+ monitorLut sRGB
+ monitorOutLUT rec709
+ int8Lut sRGB
+ int16Lut sRGB
+ logLut Cineon
+ floatLut linear
+}
+Group {
+ inputs 0
+ name Group1
+ xpos 609
+ ypos 534
+ addUserKnob {20 User}
+ addUserKnob {3 _frame l Frame}
+ _frame 1
+ addUserKnob {14 size l Size R 0 100}
+ size {1920 1080}
+}
+ BackdropNode {
+  inputs 0
+  name SetLoop
+  tile_color 0x1c1c1cff
+  gl_color 0xafaf64ff
+  label <center>SetLoop
+  note_font "Verdana Italic"
+  note_font_color 0x626262ff
+  xpos 1403
+  ypos -3099
+  bdwidth 422
+  bdheight 485
+  z_order 1
+  addUserKnob {20 Loop}
+  addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to EndLoop for configuration."}
+ }
+ Read {
+  inputs 0
+  file_type exr
+  file /home/minami/Desktop/chop-research/light-frickering/render/light-frickering.karmarendersettings.####.exr
+  format "1280 720 0 0 1280 720 1 HD_720"
+  last 121
+  origlast 121
+  origset true
+  on_error "nearest frame"
+  version 13
+  name Read2
+  xpos 1880
+  ypos -3292
+ }
+ Dot {
+  name Dot1
+  xpos 1864
+  ypos -3150
+ }
+set N88d14900 [stack 0]
+push $N88d14900
+push $N88d14900
+ TimeWarp {
+  lookup {{"(frame- 1) * 20 + iteration + 1"}}
+  time ""
+  name TimeWarp3
+  xpos 1646
+  ypos -3034
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{EndLoop.offset}}
+ }
+push $N88d14900
+ TimeWarp {
+  lookup {{"(frame - 1) * 20 + iteration + 2"}}
+  time ""
+  name TimeWarp2
+  xpos 1720
+  ypos -2962
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{EndLoop.offset}}
+ }
+add_layer {prevframe prevframe.red prevframe.green prevframe.blue prevframe.alpha}
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{0} B A}
+  out1 prevframe
+  fromInput2 {{1} B A}
+  in2 rgba
+  mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+  name Shuffle1
+  xpos 1610
+  ypos -2962
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{EndLoop.offset}}
+ }
+push $N88d14900
+ Expression {
+  temp_name0 aspect
+  temp_expr0 height/width
+  channel0 alpha
+  expr0 "x / width"
+  channel1 none
+  expr1 1
+  channel2 none
+  channel3 none
+  name Expression_UV
+  xpos 1510
+  ypos -3163
+  addUserKnob {20 User}
+  addUserKnob {7 xsize R -3 3}
+  xsize {{curve C k x1 3 s0 L x200 0.0024 s0 u3}}
+  addUserKnob {7 ysize R -3 3}
+  ysize {{xsize}}
+  addUserKnob {7 xslide}
+  xslide {{curve C k x1 -2.25 s0 L x200 0.269 s0 u3}}
+  addUserKnob {7 yslide}
+  yslide {{curve C k x1 -1.5 s0 L x200 -0.0061 s0 u3}}
+ }
+ Group {
+  name StartLoop
+  tile_color 0xa50000ff
+  note_font "Verdana Italic"
+  xpos 1510
+  ypos -3043
+  addUserKnob {20 Loop}
+  addUserKnob {26 loopbegin l "" +STARTLINE T "go to EndLoop for configuration"}
+ }
+  Read {
+   inputs 0
+   file_type exr
+   localizationPolicy off
+   origset true
+   raw true
+   name FeedbackReader
+   tile_color 0xa50000ff
+   selected true
+   xpos 139
+   ypos 139
+   postage_stamp false
+  }
+  Input {
+   inputs 0
+   name Input1
+   xpos 0
+  }
+  Switch {
+   inputs 2
+   name FeedbackSwitch
+   tile_color 0xa50000ff
+   xpos 0
+   ypos 146
+   addUserKnob {20 SetLoopInfo l Info}
+   addUserKnob {26 info l "" +STARTLINE T "when feedback writing is enabled,\nthis switch will be set to 0 on the first iteration \nand to 1 on iterations after that\n\nthe read node on input 1 will be updated to always read the most recent feedback"}
+  }
+  Output {
+   name Output1
+   xpos 0
+   ypos 300
+  }
+ end_group
+ MergeExpression {
+  inputs 2
+  temp_name0 al
+  temp_expr0 "iteration / EndLoop.loops"
+  temp_name1 bl
+  temp_expr1 "(iteration - 1) / EndLoop.loops"
+  temp_name2 d
+  temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+  temp_name3 id
+  temp_expr3 "1 - d"
+  expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+  expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+  expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+  channel3 none
+  name MergeExpression
+  xpos 1510
+  ypos -2890
+  addUserKnob {20 setloop_tab}
+  addUserKnob {7 iteration}
+  iteration {{EndLoop.offset}}
+ }
+ Group {
+  inputs 3
+  name EndLoop
+  knobChanged "import SetLoop\nSetLoop.onKnobChanged(nuke.thisNode(), nuke.thisKnob())"
+  tile_color 0xa50000ff
+  label "iteration: \[value scroll]"
+  note_font Verdana
+  note_font_color 0xffffffff
+  xpos 1500
+  ypos -2705
+  lifetimeStart 1
+  lifetimeEnd 300
+  mapsize {0.1540511727 0.174929841}
+  addUserKnob {20 Loop}
+  addUserKnob {26 ""}
+  addUserKnob {3 loops t "amount of loops to create"}
+  loops 20
+  addUserKnob {4 method t "'sequential' loops like an iterator\n\n'parallel' creates multiple instances of the same input and merges them together\n\n'geometry' is like 'parallel' but for geo" -STARTLINE M {sequential parallel geometry}}
+  addUserKnob {68 buildMethod l "" t "- in this group node (live)\n\ncopies the nodes to loop over into this group node for a live loop within Nuke\n\n\n- iterations to exr (baked)\n\nkeeps the group empty and writes each iteration as a sequence on top of an exr of the previous one, faster but not live" -STARTLINE M {"in this group node (live)" "iterations to exr (baked)" ""}}
+  addUserKnob {26 method_storage l INVISIBLE t "method_storage is used for remembering when to enable and disable the right knobs" -STARTLINE +INVISIBLE T sequential}
+  addUserKnob {26 ""}
+  addUserKnob {6 relinkextinputs l "relink external inputs" t "relink nodes that are not in the loop via extra inputs in this group node" +STARTLINE}
+  relinkextinputs true
+  addUserKnob {6 relinkextexpressions l "relink external expressions" t "attempt to fix expressions when they're moved into this group by:\n\n- changing 'parent.' to 'root.' when the nodes they refer to are not in the loop\n \n- adding 'root.' in expressions before nodes that are not within the loop\n\n\nchanges are only made to nodes in the loop itself, and they will be printed in the script editor panel" +STARTLINE}
+  relinkextexpressions true
+  addUserKnob {6 removeexprparent l "remove 'parent.'" t "automatically removes the 'parent.'-part for all expressions on nodes in the backdrop, which often fixes common relinking issues\n\nmake a copy of the nodes in the backdrop before setting the loop with this enabled, as it permanently alters the expressions on knobs\n\nall changes will be printed in the script editor panel" -STARTLINE}
+  addUserKnob {6 addIterationKnob l "add iteration knob" t "add a knob called 'iteration' to all nodes in the loop, with an integer value representing their looping index\n\nthe original nodes (the ones in the backdrop in the main graph) will also get this knob, starting at 0" +STARTLINE}
+  addIterationKnob true
+  addUserKnob {2 dirPath l directory t "path to the directory to store the sequence of iterations in (exr), ending with '/'" +HIDDEN}
+  addUserKnob {3 onFrame l frame t "frame to iterate over" +HIDDEN}
+  onFrame 1
+  addUserKnob {4 datatype t "iterations are written to raw exr" +HIDDEN M {"16 bit half" "32 bit float" ""}}
+  addUserKnob {26 ""}
+  addUserKnob {26 empty1 l "" +STARTLINE T " "}
+  addUserKnob {22 set t "build the loop" T "import SetLoop\nSetLoop.set(nuke.thisNode())" +STARTLINE}
+  addUserKnob {26 stats l "" t "current stats" -STARTLINE T "method:\t\tsequential\nnodes in total:\t105\nnodes per loop:\t4\nloops:\t\t20"}
+  addUserKnob {3 iteration t "this read-only knob will update to always show the current iteration when writing feedback images to a sequence\n\nreference to this value in expressions using\n'EndLoop.iteration'" +DISABLED +HIDDEN}
+  addUserKnob {22 startFeedback l "start feedback write" t "start writing individual iterations to image files" +HIDDEN T "import SetLoop\nSetLoop.startFeedback(nuke.thisNode())" +STARTLINE}
+  addUserKnob {22 readFeedback l "read feedback sequence" t "get the feedback sequence" -STARTLINE +HIDDEN T "import SetLoop\nSetLoop.getFeedback(nuke.thisNode())"}
+  addUserKnob {26 empty2 l "" +STARTLINE T " "}
+  addUserKnob {26 lineScroll l "" +STARTLINE}
+  addUserKnob {7 scroll t "animate the loop level" R 0 20}
+  scroll 20
+  addUserKnob {6 invert t "invert the direction of the scroll\n\n- only available with method 'parallel'" -STARTLINE +DISABLED}
+  addUserKnob {6 blend t "blends the loop levels when scroll is not a round number" +STARTLINE}
+  addUserKnob {7 spread t "feather the loop levels\n\n- only available with method 'parallel' and 'blend' enabled" -STARTLINE +DISABLED R 1 250}
+  spread 1
+  addUserKnob {26 empty3 l "" +STARTLINE T " "}
+  addUserKnob {4 parallelOperation l operation t "the merge operation to use\n\n- only available with method 'parallel'" +DISABLED M {atop average color-burn color-dodge conjoint-over copy difference disjoint-over divide exclusion from geometric hard-light hypot in mask matte max min minus multiply out over overlay plus screen soft-light stencil under xor "" "" "" "" "" "" ""}}
+  parallelOperation over
+  addUserKnob {26 empty4 l "" +STARTLINE T " "}
+  addUserKnob {7 offset t "offset the iteration knob value on all nodes in the loop\n\n- only available when 'add iteration knob' is enabled" R -20 20}
+  addUserKnob {26 ""}
+  addUserKnob {26 empty5 l "" +STARTLINE T " "}
+  addUserKnob {26 version l "" +STARTLINE T "SetLoop 1.9"}
+  addUserKnob {26 me l "" +STARTLINE T "Max van Leeuwen"}
+  addUserKnob {26 website l "" t "see my website for examples/tutorials" +STARTLINE T "<a href=\"https://www.maxvanleeuwen.com/setloop\"><font color=\"#b2b2b2\">maxvanleeuwen.com/setloop</font></a>"}
+  addUserKnob {20 CustomTab l Custom}
+  addUserKnob {26 customInfo l "" +STARTLINE T "room for custom knobs that can be referenced to from expressions in the loop"}
+  addUserKnob {26 ""}
+  addUserKnob {26 empty6 l "" +STARTLINE T " "}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos -40
+   ypos -10
+  }
+  Dot {
+   name LoopAnchor_0
+   xpos -6
+   ypos 16
+  }
+set Nd89bcb50 [stack 0]
+  Input {
+   inputs 0
+   name Dot1
+   number 1
+  }
+set N9604f1a0 [stack 0]
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp3
+   xpos -40
+   ypos 34
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"1 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp2
+   xpos 34
+   ypos 106
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"1 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle1
+   xpos -76
+   ypos 106
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"1 + parent.offset"}}
+  }
+push $Nd89bcb50
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression
+   xpos -176
+   ypos 178
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"1 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_1
+   xpos -142
+   ypos 204
+  }
+set Nd1cd94e0 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp1
+   xpos -176
+   ypos 222
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"2 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp4
+   xpos -102
+   ypos 294
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"2 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle2
+   xpos -212
+   ypos 294
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"2 + parent.offset"}}
+  }
+push $Nd1cd94e0
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression1
+   xpos -312
+   ypos 366
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"2 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_2
+   xpos -278
+   ypos 392
+  }
+set Ndb3619c0 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp5
+   xpos -312
+   ypos 410
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"3 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp6
+   xpos -238
+   ypos 482
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"3 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle3
+   xpos -348
+   ypos 482
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"3 + parent.offset"}}
+  }
+push $Ndb3619c0
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression2
+   xpos -448
+   ypos 554
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"3 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_3
+   xpos -414
+   ypos 580
+  }
+set Neecb50e0 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp7
+   xpos -448
+   ypos 598
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"4 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp8
+   xpos -374
+   ypos 670
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"4 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle4
+   xpos -484
+   ypos 670
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"4 + parent.offset"}}
+  }
+push $Neecb50e0
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression3
+   xpos -584
+   ypos 742
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"4 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_4
+   xpos -550
+   ypos 768
+  }
+set Neec19ea0 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp9
+   xpos -584
+   ypos 786
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"5 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp10
+   xpos -510
+   ypos 858
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"5 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle5
+   xpos -620
+   ypos 858
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"5 + parent.offset"}}
+  }
+push $Neec19ea0
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression4
+   xpos -720
+   ypos 930
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"5 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_5
+   xpos -686
+   ypos 956
+  }
+set Need06e70 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp11
+   xpos -720
+   ypos 974
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"6 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp12
+   xpos -646
+   ypos 1046
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"6 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle6
+   xpos -756
+   ypos 1046
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"6 + parent.offset"}}
+  }
+push $Need06e70
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression5
+   xpos -856
+   ypos 1118
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"6 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_6
+   xpos -822
+   ypos 1144
+  }
+set Need07390 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp13
+   xpos -856
+   ypos 1162
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"7 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp14
+   xpos -782
+   ypos 1234
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"7 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle7
+   xpos -892
+   ypos 1234
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"7 + parent.offset"}}
+  }
+push $Need07390
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression6
+   xpos -992
+   ypos 1306
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"7 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_7
+   xpos -958
+   ypos 1332
+  }
+set Nec05c030 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp15
+   xpos -992
+   ypos 1350
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"8 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp16
+   xpos -918
+   ypos 1422
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"8 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle8
+   xpos -1028
+   ypos 1422
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"8 + parent.offset"}}
+  }
+push $Nec05c030
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression7
+   xpos -1128
+   ypos 1494
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"8 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_8
+   xpos -1094
+   ypos 1520
+  }
+set Needfe1e0 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp17
+   xpos -1128
+   ypos 1538
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"9 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp18
+   xpos -1054
+   ypos 1610
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"9 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle9
+   xpos -1164
+   ypos 1610
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"9 + parent.offset"}}
+  }
+push $Needfe1e0
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression8
+   xpos -1264
+   ypos 1682
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"9 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_9
+   xpos -1230
+   ypos 1708
+  }
+set N3a67c3c0 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp19
+   xpos -1264
+   ypos 1726
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"10 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp20
+   xpos -1190
+   ypos 1798
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"10 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle10
+   xpos -1300
+   ypos 1798
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"10 + parent.offset"}}
+  }
+push $N3a67c3c0
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression9
+   xpos -1400
+   ypos 1870
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"10 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_10
+   xpos -1366
+   ypos 1896
+  }
+set Need3d530 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp21
+   xpos -1400
+   ypos 1914
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"11 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp22
+   xpos -1326
+   ypos 1986
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"11 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle11
+   xpos -1436
+   ypos 1986
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"11 + parent.offset"}}
+  }
+push $Need3d530
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression10
+   xpos -1536
+   ypos 2058
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"11 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_11
+   xpos -1502
+   ypos 2084
+  }
+set Need09f10 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp23
+   xpos -1536
+   ypos 2102
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"12 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp24
+   xpos -1462
+   ypos 2174
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"12 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle12
+   xpos -1572
+   ypos 2174
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"12 + parent.offset"}}
+  }
+push $Need09f10
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression11
+   xpos -1672
+   ypos 2246
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"12 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_12
+   xpos -1638
+   ypos 2272
+  }
+set Nd8cfd3b0 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp25
+   xpos -1672
+   ypos 2290
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"13 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp26
+   xpos -1598
+   ypos 2362
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"13 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle13
+   xpos -1708
+   ypos 2362
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"13 + parent.offset"}}
+  }
+push $Nd8cfd3b0
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression12
+   xpos -1808
+   ypos 2434
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"13 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_13
+   xpos -1774
+   ypos 2460
+  }
+set Nd3cef140 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp27
+   xpos -1808
+   ypos 2478
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"14 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp28
+   xpos -1734
+   ypos 2550
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"14 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle14
+   xpos -1844
+   ypos 2550
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"14 + parent.offset"}}
+  }
+push $Nd3cef140
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression13
+   xpos -1944
+   ypos 2622
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"14 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_14
+   xpos -1910
+   ypos 2648
+  }
+set Nd15c4a50 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp29
+   xpos -1944
+   ypos 2666
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"15 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp30
+   xpos -1870
+   ypos 2738
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"15 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle15
+   xpos -1980
+   ypos 2738
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"15 + parent.offset"}}
+  }
+push $Nd15c4a50
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression14
+   xpos -2080
+   ypos 2810
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"15 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_15
+   xpos -2046
+   ypos 2836
+  }
+set Nd0cf2a50 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp31
+   xpos -2080
+   ypos 2854
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"16 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp32
+   xpos -2006
+   ypos 2926
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"16 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle16
+   xpos -2116
+   ypos 2926
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"16 + parent.offset"}}
+  }
+push $Nd0cf2a50
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression15
+   xpos -2216
+   ypos 2998
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"16 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_16
+   xpos -2182
+   ypos 3024
+  }
+set Nd11ec9c0 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp33
+   xpos -2216
+   ypos 3042
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"17 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp34
+   xpos -2142
+   ypos 3114
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"17 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle17
+   xpos -2252
+   ypos 3114
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"17 + parent.offset"}}
+  }
+push $Nd11ec9c0
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression16
+   xpos -2352
+   ypos 3186
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"17 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_17
+   xpos -2318
+   ypos 3212
+  }
+set Nd2d6eb50 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp35
+   xpos -2352
+   ypos 3230
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"18 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp36
+   xpos -2278
+   ypos 3302
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"18 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle18
+   xpos -2388
+   ypos 3302
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"18 + parent.offset"}}
+  }
+push $Nd2d6eb50
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression17
+   xpos -2488
+   ypos 3374
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"18 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_18
+   xpos -2454
+   ypos 3400
+  }
+set Nd1688450 [stack 0]
+push 0
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp37
+   xpos -2488
+   ypos 3418
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"19 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp38
+   xpos -2414
+   ypos 3490
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"19 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle19
+   xpos -2524
+   ypos 3490
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"19 + parent.offset"}}
+  }
+push $Nd1688450
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression18
+   xpos -2624
+   ypos 3562
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"19 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_19
+   xpos -2590
+   ypos 3588
+  }
+set Needa2600 [stack 0]
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   time ""
+   name TimeWarp39
+   selected true
+   xpos -2624
+   ypos 3606
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"20 + parent.offset"}}
+  }
+push $N9604f1a0
+  TimeWarp {
+   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   time ""
+   name TimeWarp40
+   selected true
+   xpos -2550
+   ypos 3678
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"20 + parent.offset"}}
+  }
+  Shuffle2 {
+   inputs 2
+   fromInput1 {{0} B A}
+   out1 prevframe
+   fromInput2 {{1} B A}
+   in2 rgba
+   mappings "4 rgba.red 1 0 prevframe.red 0 0 rgba.green 1 1 prevframe.green 0 1 rgba.blue 1 2 prevframe.blue 0 2 rgba.alpha 1 3 prevframe.alpha 0 3"
+   name Shuffle20
+   selected true
+   xpos -2660
+   ypos 3678
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"20 + parent.offset"}}
+  }
+push $Needa2600
+  MergeExpression {
+   inputs 2
+   temp_name0 al
+   temp_expr0 "iteration / EndLoop.loops"
+   temp_name1 bl
+   temp_expr1 "(iteration - 1) / EndLoop.loops"
+   temp_name2 d
+   temp_expr2 "1 - (    (Ba - bl) / (1 / EndLoop.loops)    )"
+   temp_name3 id
+   temp_expr3 "1 - d"
+   expr0 "(bl <  Ba) && (Ba <= al) ? Aprevframe.red * d  + Ar * id : Br"
+   expr1 "(bl <  Ba) && (Ba <= al) ? Aprevframe.green * d + Ag * id : Bg"
+   expr2 "(bl <  Ba) && (Ba <= al) ? Aprevframe.blue * d + Ab * id : Bb"
+   channel3 none
+   name MergeExpression19
+   selected true
+   xpos -2760
+   ypos 3750
+   addUserKnob {20 setloop_tab}
+   addUserKnob {7 iteration}
+   iteration {{"20 + parent.offset"}}
+  }
+  Dot {
+   name LoopAnchor_20
+   selected true
+  }
+  Dissolve {
+   inputs 21+1
+   which {{"parent.loops - (parent.blend ? parent.scroll : floor(parent.scroll))"}}
+   name Dissolve1
+  }
+  Output {
+   name Output1
+  }
+ end_group
+set N29ce9f0 [stack 0]
+ Output {
+  name Output1
+  xpos 1636
+  ypos -2530
+ }
+push $N29ce9f0
+ Viewer {
+  frame_range 1-6
+  frame_range_lock true
+  channels rgb
+  monitorOutOutputTransform rec709
+  name Viewer2
+  selected true
+  xpos 1311
+  ypos -2589
+ }
+end_group
+TimeClip {
+ time ""
+ before loop
+ last 6
+ after loop
+ origlast 6
+ origset true
+ mask_metadata true
+ name TimeClip1
+ xpos 478
+ ypos 600
+}
+Grade {
+ blackpoint 0.019
+ whitepoint 2.67
+ black -0.001
+ white 0.28
+ multiply 1.08
+ add 0.0014
+ gamma 0.995
+ name Grade1
+ xpos 620
+ ypos 662
+}
+Glow2 {
+ brightness 2.68
+ size 2.7
+ name Glow1
+ xpos 620
+ ypos 710
+}
+set Nbfa22f0 [stack 0]
+Viewer {
+ frame 1
+ frame_range 1-6
+ channels {rgba.red rgba.green rgba.blue none}
+ monitorOutOutputTransform rec709
+ name Viewer1
+ xpos 827
+ ypos 734
+}
+push $Nbfa22f0
+Write {
+ file out.mp4
+ file_type mov
+ mov64_format "mp4 (MP4 (MPEG-4 Part 14))"
+ mov64_codec h264
+ mov_h264_codec_profile "High 4:2:0 8-bit"
+ mov64_pixel_format {{0}}
+ mov64_quality Best
+ mov64_fast_start true
+ mov64_write_timecode true
+ mov64_gop_size 12
+ mov64_b_frames 0
+ mov64_bitrate 50000
+ mov64_bitrate_tolerance 0
+ mov64_quality_min 1
+ mov64_quality_max 1
+ checkHashOnRead false
+ version 3
+ name Write1
+ xpos 676
+ ypos 799
+}
