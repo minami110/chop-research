@@ -1,5 +1,5 @@
 #! /home/minami/.local/Nuke/13.2v5/libnuke-13.2.5.so -nx
-#write_info Write1 file:"out.mp4" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 6" fps:"0" colorspace:"default (Gamma2.2)" datatype:"unknown" transfer:"unknown" views:"main" colorManagement:"Nuke"
+#write_info Write1 file:"input.mp4" format:"1280 720 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 6" fps:"0" colorspace:"Output - Rec.709" datatype:"unknown" transfer:"unknown" views:"main" colorManagement:"OCIO"
 version 13.2 v5
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
@@ -9,23 +9,21 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <dock id="" hideTitles="1" activePageId="Toolbar.1">
                 <page id="Toolbar.1"/>
             </dock>
-            <split size="1314" stretch="1"/>
+            <split size="1897" stretch="1"/>
             <splitter orientation="2">
                 <split size="780"/>
-                <dock id="" activePageId="Viewer.3">
+                <dock id="" activePageId="Viewer.1">
                     <page id="Viewer.1"/>
-                    <page id="Viewer.3"/>
-                    <page id="Viewer.2"/>
                 </dock>
                 <split size="548"/>
-                <dock id="" activePageId="DAG.1" focus="true">
+                <dock id="" activePageId="DAG.1">
                     <page id="DAG.1"/>
                     <page id="Curve Editor.1"/>
                     <page id="DopeSheet.1"/>
                     <page id="DAG.2"/>
                 </dock>
             </splitter>
-            <split size="1198"/>
+            <split size="615"/>
             <dock id="" activePageId="Properties.1">
                 <page id="Properties.1"/>
                 <page id="uk.co.thefoundry.backgroundrenderview.1"/>
@@ -36,27 +34,44 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 }
 Root {
  inputs 0
- name /home/minami/Desktop/chop-research/light-frickering/comp.nk
+ name /home/minami/Desktop/chop-research-main/light-frickering/comp.nk
  project_directory "\[python \{nuke.script_directory()\}]"
+ frame 4
  last_frame 6
  lock_range true
  format "1920 1080 0 0 1920 1080 1 HD_1080"
  proxy_type scale
  proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
- colorManagement Nuke
+ colorManagement OCIO
  OCIO_config aces_1.2
- workingSpaceLUT linear
- monitorLut sRGB
- monitorOutLUT rec709
- int8Lut sRGB
- int16Lut sRGB
- logLut Cineon
- floatLut linear
+ defaultViewerLUT "OCIO LUTs"
+ workingSpaceLUT scene_linear
+ monitorLut ACES/sRGB
+ monitorOutLUT "sRGB (ACES)"
+ int8Lut matte_paint
+ int16Lut texture_paint
+ logLut compositing_log
+ floatLut scene_linear
+}
+Read {
+ inputs 0
+ file_type exr
+ file render/light-frickering.karmarendersettings.###.exr
+ format "1280 720 0 0 1280 720 1 HD_720"
+ first 100
+ last 700
+ frame "100 + (frame - 1 ) * 5"
+ origfirst 100
+ origlast 700
+ origset true
+ version 13
+ name Read1
+ xpos 813
+ ypos 378
 }
 Group {
- inputs 0
  name Group1
- xpos 609
+ xpos 608
  ypos 534
  addUserKnob {20 User}
  addUserKnob {3 _frame l Frame}
@@ -80,30 +95,22 @@ Group {
   addUserKnob {20 Loop}
   addUserKnob {26 SetLoop_bd l "" +STARTLINE T "Keep the loop within this backdrop!\nResize the backdrop if necessary.\nGo to EndLoop for configuration."}
  }
- Read {
+ Input {
   inputs 0
-  file_type exr
-  file /home/minami/Desktop/chop-research/light-frickering/render/light-frickering.karmarendersettings.####.exr
-  format "1280 720 0 0 1280 720 1 HD_720"
-  last 121
-  origlast 121
-  origset true
-  on_error "nearest frame"
-  version 13
-  name Read2
-  xpos 1880
-  ypos -3292
+  name Input1
+  xpos 2110
+  ypos -3330
  }
  Dot {
   name Dot1
   xpos 1864
   ypos -3150
  }
-set N88d14900 [stack 0]
-push $N88d14900
-push $N88d14900
+set Nb158380 [stack 0]
+push $Nb158380
+push $Nb158380
  TimeWarp {
-  lookup {{"(frame- 1) * 20 + iteration + 1"}}
+  lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
   time ""
   name TimeWarp3
   xpos 1646
@@ -112,9 +119,9 @@ push $N88d14900
   addUserKnob {7 iteration}
   iteration {{EndLoop.offset}}
  }
-push $N88d14900
+push $Nb158380
  TimeWarp {
-  lookup {{"(frame - 1) * 20 + iteration + 2"}}
+  lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
   time ""
   name TimeWarp2
   xpos 1720
@@ -138,12 +145,12 @@ add_layer {prevframe prevframe.red prevframe.green prevframe.blue prevframe.alph
   addUserKnob {7 iteration}
   iteration {{EndLoop.offset}}
  }
-push $N88d14900
+push $Nb158380
  Expression {
   temp_name0 aspect
   temp_expr0 height/width
   channel0 alpha
-  expr0 "x / width"
+  expr0 "y / height"
   channel1 none
   expr1 1
   channel2 none
@@ -297,15 +304,15 @@ push $N88d14900
    xpos -6
    ypos 16
   }
-set Nd89bcb50 [stack 0]
+set Ncac5c00 [stack 0]
   Input {
    inputs 0
    name Dot1
    number 1
   }
-set N9604f1a0 [stack 0]
+set Ncb29740 [stack 0]
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp3
    xpos -40
@@ -314,9 +321,9 @@ set N9604f1a0 [stack 0]
    addUserKnob {7 iteration}
    iteration {{"1 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp2
    xpos 34
@@ -339,7 +346,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"1 + parent.offset"}}
   }
-push $Nd89bcb50
+push $Ncac5c00
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -366,10 +373,10 @@ push $Nd89bcb50
    xpos -142
    ypos 204
   }
-set Nd1cd94e0 [stack 0]
-push $N9604f1a0
+set Nb582be0 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp1
    xpos -176
@@ -378,9 +385,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"2 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp4
    xpos -102
@@ -403,7 +410,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"2 + parent.offset"}}
   }
-push $Nd1cd94e0
+push $Nb582be0
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -430,10 +437,10 @@ push $Nd1cd94e0
    xpos -278
    ypos 392
   }
-set Ndb3619c0 [stack 0]
-push $N9604f1a0
+set N15d9d6b0 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp5
    xpos -312
@@ -442,9 +449,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"3 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp6
    xpos -238
@@ -467,7 +474,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"3 + parent.offset"}}
   }
-push $Ndb3619c0
+push $N15d9d6b0
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -494,10 +501,10 @@ push $Ndb3619c0
    xpos -414
    ypos 580
   }
-set Neecb50e0 [stack 0]
-push $N9604f1a0
+set N15dd2960 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp7
    xpos -448
@@ -506,9 +513,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"4 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp8
    xpos -374
@@ -531,7 +538,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"4 + parent.offset"}}
   }
-push $Neecb50e0
+push $N15dd2960
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -558,10 +565,10 @@ push $Neecb50e0
    xpos -550
    ypos 768
   }
-set Neec19ea0 [stack 0]
-push $N9604f1a0
+set N15e08320 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp9
    xpos -584
@@ -570,9 +577,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"5 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp10
    xpos -510
@@ -595,7 +602,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"5 + parent.offset"}}
   }
-push $Neec19ea0
+push $N15e08320
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -622,10 +629,10 @@ push $Neec19ea0
    xpos -686
    ypos 956
   }
-set Need06e70 [stack 0]
-push $N9604f1a0
+set N15e3d420 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp11
    xpos -720
@@ -634,9 +641,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"6 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp12
    xpos -646
@@ -659,7 +666,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"6 + parent.offset"}}
   }
-push $Need06e70
+push $N15e3d420
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -686,10 +693,10 @@ push $Need06e70
    xpos -822
    ypos 1144
   }
-set Need07390 [stack 0]
-push $N9604f1a0
+set N15e43c20 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp13
    xpos -856
@@ -698,9 +705,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"7 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp14
    xpos -782
@@ -723,7 +730,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"7 + parent.offset"}}
   }
-push $Need07390
+push $N15e43c20
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -750,10 +757,10 @@ push $Need07390
    xpos -958
    ypos 1332
   }
-set Nec05c030 [stack 0]
-push $N9604f1a0
+set N15e78d10 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp15
    xpos -992
@@ -762,9 +769,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"8 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp16
    xpos -918
@@ -787,7 +794,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"8 + parent.offset"}}
   }
-push $Nec05c030
+push $N15e78d10
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -814,10 +821,10 @@ push $Nec05c030
    xpos -1094
    ypos 1520
   }
-set Needfe1e0 [stack 0]
-push $N9604f1a0
+set N15edc4a0 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp17
    xpos -1128
@@ -826,9 +833,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"9 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp18
    xpos -1054
@@ -851,7 +858,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"9 + parent.offset"}}
   }
-push $Needfe1e0
+push $N15edc4a0
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -878,10 +885,10 @@ push $Needfe1e0
    xpos -1230
    ypos 1708
   }
-set N3a67c3c0 [stack 0]
-push $N9604f1a0
+set N15e06f10 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp19
    xpos -1264
@@ -890,9 +897,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"10 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp20
    xpos -1190
@@ -915,7 +922,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"10 + parent.offset"}}
   }
-push $N3a67c3c0
+push $N15e06f10
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -942,10 +949,10 @@ push $N3a67c3c0
    xpos -1366
    ypos 1896
   }
-set Need3d530 [stack 0]
-push $N9604f1a0
+set N15f47430 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp21
    xpos -1400
@@ -954,9 +961,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"11 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp22
    xpos -1326
@@ -979,7 +986,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"11 + parent.offset"}}
   }
-push $Need3d530
+push $N15f47430
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1006,10 +1013,10 @@ push $Need3d530
    xpos -1502
    ypos 2084
   }
-set Need09f10 [stack 0]
-push $N9604f1a0
+set N15f7cf40 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp23
    xpos -1536
@@ -1018,9 +1025,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"12 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp24
    xpos -1462
@@ -1043,7 +1050,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"12 + parent.offset"}}
   }
-push $Need09f10
+push $N15f7cf40
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1070,10 +1077,10 @@ push $Need09f10
    xpos -1638
    ypos 2272
   }
-set Nd8cfd3b0 [stack 0]
-push $N9604f1a0
+set N15d7a8b0 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp25
    xpos -1672
@@ -1082,9 +1089,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"13 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp26
    xpos -1598
@@ -1107,7 +1114,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"13 + parent.offset"}}
   }
-push $Nd8cfd3b0
+push $N15d7a8b0
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1134,10 +1141,10 @@ push $Nd8cfd3b0
    xpos -1774
    ypos 2460
   }
-set Nd3cef140 [stack 0]
-push $N9604f1a0
+set N15fea870 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp27
    xpos -1808
@@ -1146,9 +1153,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"14 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp28
    xpos -1734
@@ -1171,7 +1178,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"14 + parent.offset"}}
   }
-push $Nd3cef140
+push $N15fea870
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1198,10 +1205,10 @@ push $Nd3cef140
    xpos -1910
    ypos 2648
   }
-set Nd15c4a50 [stack 0]
-push $N9604f1a0
+set N1601f290 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp29
    xpos -1944
@@ -1210,9 +1217,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"15 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp30
    xpos -1870
@@ -1235,7 +1242,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"15 + parent.offset"}}
   }
-push $Nd15c4a50
+push $N1601f290
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1262,10 +1269,10 @@ push $Nd15c4a50
    xpos -2046
    ypos 2836
   }
-set Nd0cf2a50 [stack 0]
-push $N9604f1a0
+set N160542a0 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp31
    xpos -2080
@@ -1274,9 +1281,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"16 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp32
    xpos -2006
@@ -1299,7 +1306,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"16 + parent.offset"}}
   }
-push $Nd0cf2a50
+push $N160542a0
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1326,10 +1333,10 @@ push $Nd0cf2a50
    xpos -2182
    ypos 3024
   }
-set Nd11ec9c0 [stack 0]
-push $N9604f1a0
+set N1608a660 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp33
    xpos -2216
@@ -1338,9 +1345,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"17 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp34
    xpos -2142
@@ -1363,7 +1370,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"17 + parent.offset"}}
   }
-push $Nd11ec9c0
+push $N1608a660
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1390,10 +1397,10 @@ push $Nd11ec9c0
    xpos -2318
    ypos 3212
   }
-set Nd2d6eb50 [stack 0]
-push $N9604f1a0
+set N160beb30 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp35
    xpos -2352
@@ -1402,9 +1409,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"18 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp36
    xpos -2278
@@ -1427,7 +1434,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"18 + parent.offset"}}
   }
-push $Nd2d6eb50
+push $N160beb30
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1454,11 +1461,11 @@ push $Nd2d6eb50
    xpos -2454
    ypos 3400
   }
-set Nd1688450 [stack 0]
+set N160f3f10 [stack 0]
 push 0
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp37
    xpos -2488
@@ -1467,9 +1474,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"19 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp38
    xpos -2414
@@ -1492,7 +1499,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"19 + parent.offset"}}
   }
-push $Nd1688450
+push $N160f3f10
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1519,10 +1526,10 @@ push $Nd1688450
    xpos -2590
    ypos 3588
   }
-set Needa2600 [stack 0]
-push $N9604f1a0
+set N16128fe0 [stack 0]
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame- 1) * 20 + iteration + 1"}}
+   lookup {{"(frame- 1) * EndLoop.loops + iteration + 1"}}
    time ""
    name TimeWarp39
    selected true
@@ -1532,9 +1539,9 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"20 + parent.offset"}}
   }
-push $N9604f1a0
+push $Ncb29740
   TimeWarp {
-   lookup {{"(frame - 1) * 20 + iteration + 2"}}
+   lookup {{"(frame - 1) * EndLoop.loops + iteration + 2"}}
    time ""
    name TimeWarp40
    selected true
@@ -1559,7 +1566,7 @@ push $N9604f1a0
    addUserKnob {7 iteration}
    iteration {{"20 + parent.offset"}}
   }
-push $Needa2600
+push $N16128fe0
   MergeExpression {
    inputs 2
    temp_name0 al
@@ -1595,22 +1602,10 @@ push $Needa2600
    name Output1
   }
  end_group
-set N29ce9f0 [stack 0]
  Output {
   name Output1
   xpos 1636
   ypos -2530
- }
-push $N29ce9f0
- Viewer {
-  frame_range 1-6
-  frame_range_lock true
-  channels rgb
-  monitorOutOutputTransform rec709
-  name Viewer2
-  selected true
-  xpos 1311
-  ypos -2589
  }
 end_group
 TimeClip {
@@ -1622,14 +1617,14 @@ TimeClip {
  origset true
  mask_metadata true
  name TimeClip1
- xpos 478
- ypos 600
+ xpos 563
+ ypos 606
 }
 Grade {
  blackpoint 0.019
- whitepoint 2.67
+ whitepoint 1.58
  black -0.001
- white 0.28
+ white 0.48
  multiply 1.08
  add 0.0014
  gamma 0.995
@@ -1644,25 +1639,15 @@ Glow2 {
  xpos 620
  ypos 710
 }
-set Nbfa22f0 [stack 0]
-Viewer {
- frame 1
- frame_range 1-6
- channels {rgba.red rgba.green rgba.blue none}
- monitorOutOutputTransform rec709
- name Viewer1
- xpos 827
- ypos 734
-}
-push $Nbfa22f0
 Write {
- file out.mp4
+ file input.mp4
+ colorspace "Output - Rec.709"
  file_type mov
  mov64_format "mp4 (MP4 (MPEG-4 Part 14))"
  mov64_codec h264
  mov_h264_codec_profile "High 4:2:0 8-bit"
- mov64_pixel_format {{0}}
- mov64_quality Best
+ mov64_pixel_format {{0} "yuv420p\tYCbCr 4:2:0 8-bit"}
+ mov64_quality Custom
  mov64_fast_start true
  mov64_write_timecode true
  mov64_gop_size 12
@@ -1672,8 +1657,17 @@ Write {
  mov64_quality_min 1
  mov64_quality_max 1
  checkHashOnRead false
- version 3
+ version 10
  name Write1
+ selected true
  xpos 676
- ypos 799
+ ypos 792
+}
+Viewer {
+ frame 4
+ frame_range 1-6
+ viewerProcess "sRGB (ACES)"
+ name Viewer1
+ xpos 861
+ ypos 590
 }
